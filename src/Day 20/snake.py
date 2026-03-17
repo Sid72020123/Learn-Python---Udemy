@@ -1,7 +1,7 @@
 from turtle import Turtle
 
 STARTING_POSITIONS = [(0, 0), (-20, 0), (-40, 0)]
-MOVE_DISTANCE = 5
+MOVE_DISTANCE = 20
 DIR_UP = 90
 DIR_DOWN = 270
 DIR_RIGHT = 0
