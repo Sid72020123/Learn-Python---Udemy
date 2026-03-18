@@ -22,6 +22,9 @@ class Snake:
         segment.goto(position)
         self.segments.append(segment)
 
+    def increase_length(self):
+        self._create_snake_segment("square", "white", self.segments[-1].position())
+
     def move(self):
         for idx in range(len(self.segments) - 1, 0, -1):
             new_x = self.segments[idx - 1].xcor()
