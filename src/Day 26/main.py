@@ -39,3 +39,41 @@ result = [n for n in numbers_1 if n in numbers_2]
 print(result)
 
 # Dictionary Comprehension
+
+# # new_dict = {new_key:new_value for item in list}
+# # new_dict = {new_key:new_value for (key, value) in dict.items()}
+# # new_dict = {new_key:new_value for (key, value) in dict.items() if test}
+
+# Coding Exercise 18
+sentence = "What is the Airspeed Velocity of an Unladen Swallow?"
+result = {word: len(word) for word in sentence.split(" ")}
+
+
+# Coding Exercise 18
+weather_c = {
+    "Monday": 12,
+    "Tuesday": 14,
+    "Wednesday": 15,
+    "Thursday": 14,
+    "Friday": 21,
+    "Saturday": 22,
+    "Sunday": 24,
+}
+
+weather_f = {day: (temp * 9 / 5) + 32 for (day, temp) in weather_c.items()}
+
+print(weather_f)
+
+
+# Iterate over a Pandas DataFrame
+
+import pandas as pd
+
+student_dict = {"student": ["A", "B", "C"], "score": [56, 76, 98]}
+
+df = pd.DataFrame(student_dict)
+
+print(df)
+
+for index, row in df.iterrows():
+    print(index, row.student)
