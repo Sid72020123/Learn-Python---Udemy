@@ -5,10 +5,14 @@ window = tkinter.Tk()
 window.title("GUI Window")
 window.minsize(width=500, height=300)
 
+# Add padding
+window.config(padx=20, pady=20)  # This method can also be used on individual components
 
 # Label
 label = tkinter.Label(text="This is a label", font=("Arial", 24, "bold"))
-label.pack()
+# label.pack()
+# label.place(x=0, y=0)
+label.grid(column=0, row=0)
 
 
 # Button
@@ -19,15 +23,22 @@ def button_clicked():
 
 
 button = tkinter.Button(text="This is a button!", command=button_clicked)
-button.pack()
+# button.pack()
+button.grid(column=1, row=1)
 
+button2 = tkinter.Button(text="This is another button!", command=button_clicked)
+button2.grid(column=2, row=0)
 
 # Entry
 input_text = tkinter.Entry(width=10)
 input_text.insert(tkinter.END, string="Some text to begin with.")
 print(input_text.get())
-input_text.pack()
+# input_text.pack()
+input_text.grid(column=3, row=2)
 
+window.mainloop()
+
+"""
 # Text
 text = tkinter.Text(height=5, width=30)
 text.focus()
@@ -39,7 +50,7 @@ print(
 text.pack()
 
 
-# Spinbox
+# Spinbox 
 def spinbox_used():
     print(spinbox.get())
 
@@ -99,8 +110,7 @@ for item in fruits:
 
 listbox.bind("<<ListboxSelect>>", listbox_used)
 listbox.pack()
-
-window.mainloop()
+"""
 
 
 """
