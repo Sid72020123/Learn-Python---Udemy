@@ -21,7 +21,7 @@ for label, positions in LABELS.items():
 
 def calculate():
     miles = float(number_input.get())
-    kilometers = miles * 1.609344
+    kilometers = miles * 1.609
     answer_label.config(text=f"{kilometers:.2f}")
 
 
