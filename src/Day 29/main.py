@@ -1,6 +1,7 @@
 from string import ascii_uppercase, ascii_lowercase, digits, punctuation
 import pathlib
 from tkinter import *
+from tkinter import messagebox
 from random import choice
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
@@ -24,12 +25,12 @@ def save_password(website, username, password):
         f = open("passwords.txt", "w")
         titles = ["Website", "Username / Email", "Password"]
         for title in titles:
-            f.write(f"| {title.center(50)} |")
-        f.write("\n")
+            f.write(f"|| {title.center(50)} ")
+        f.write("||\n")
         f.close()
     with open("passwords.txt", "a+") as file:
         file.write(
-            f"| {website.center(50)} || {username.center(50)} || {password.center(50)} |\n"
+            f"|| {website.center(50)} || {username.center(50)} || {password.center(50)} ||\n"
         )
 
 
@@ -38,9 +39,22 @@ def add_password():
     username = username_input.get()
     password = password_input.get()
 
-    save_password(website, username, password)
-    website_input.delete(0, END)
-    password_input.delete(0, END)
+    if not (website and username and password):
+        messagebox.showerror(
+            title="Fields Empty!",
+            message="Some fields are empty!\nPlease fill all the required fields...",
+        )
+        return
+
+    confirm_save = messagebox.askokcancel(
+        title="Confirm Entry",
+        message=f"These are the details entered:\nWebsite: {website}\nUsername / Email: {username}\nPassword: {password}\n\nSave the entry?",
+    )
+
+    if confirm_save:
+        save_password(website, username, password)
+        website_input.delete(0, END)
+        password_input.delete(0, END)
 
 
 # ---------------------------- UI SETUP ------------------------------- #
