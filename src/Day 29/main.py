@@ -3,6 +3,7 @@ import pathlib
 from tkinter import *
 from tkinter import messagebox
 from random import choice
+import pyperclip
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 
@@ -53,6 +54,7 @@ def add_password():
 
     if confirm_save:
         save_password(website, username, password)
+        pyperclip.copy(password)
         website_input.delete(0, END)
         password_input.delete(0, END)
 
