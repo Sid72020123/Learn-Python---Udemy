@@ -36,4 +36,7 @@ print("Email sent!")
 
 import datetime
 
-print(datetime.datetime.now().second)
+# print(datetime.datetime.now().second)
+
+date = datetime.datetime(2026, 7, 8)
+print(date)
