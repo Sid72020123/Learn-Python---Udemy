@@ -1,3 +1,6 @@
+"""Sending Emails"""
+
+"""
 import os
 from dotenv import load_dotenv
 
@@ -26,3 +29,11 @@ with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as smtp:
     smtp.send_message(msg)
 
 print("Email sent!")
+"""
+
+
+"""Working with datetime"""
+
+import datetime
+
+print(datetime.datetime.now().second)
