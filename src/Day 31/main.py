@@ -34,10 +34,8 @@ def show_random_word():
     translated = random_word_info["Translated"]
 
     canvas.itemconfig(canvas_image, image=front_card_image)
-    canvas.itemconfig(
-        title_text, text=FRONT_LANGUAGE, fill="black", font=hindi_word_font
-    )
-    canvas.itemconfig(word_text, text=word, fill="black")
+    canvas.itemconfig(title_text, text=FRONT_LANGUAGE, fill="black")
+    canvas.itemconfig(word_text, text=word, fill="black", font=hindi_word_font)
     canvas.itemconfig(transliteration_text, text=transliteration)
 
     flip_timer = window.after(TIMER, lambda: show_translation(translated))
