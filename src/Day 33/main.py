@@ -1,5 +1,5 @@
 import os
-from time import sleep
+from time import sleep, strftime
 import requests
 from datetime import datetime
 
@@ -45,7 +45,9 @@ MY_LONG = 72.869203
 
 while True:
     try:
-        response = requests.get(url="http://api.open-notify.org/iss-now.json")
+        print(f"Current Time: {strftime('%d/%m/%Y, %H:%M:%S')}")
+        print("Requesting ISS Location API...")
+        response = requests.get(url="http://api.open-notify.org/iss-now.json", timeout=15)
         response.raise_for_status()
         data = response.json()
 
@@ -58,6 +60,7 @@ while True:
         ):
             in_location_range = True
 
+        print("Requesting Sunrise / Sunset API...\n")
         response = requests.get(
             "https://api.sunrise-sunset.org/v2", params={"lat": MY_LAT, "lng": MY_LONG}
         )
@@ -84,7 +87,7 @@ while True:
             send_alert_email()
 
         last_range_status = in_location_range
-        print("-" * 50)
+        print("-" * 70)
     except Exception as E:
         print("Exception:", E)
     sleep(60)  # Check every 1 minute
