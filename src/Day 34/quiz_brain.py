@@ -22,13 +22,10 @@ class QuizBrain:
 
     def check_answer(self, user_answer):
         correct_answer = self.current_question.answer
-        if user_answer.lower() == correct_answer.lower():
-            return True
-        else:
-            return False
+        return user_answer.lower() == correct_answer.lower()
 
     def refresh_question_bank(self):
+        self.question_number = 0
+        self.score = 0
         self.question_list = get_question_bank()
         self.current_question = None
-        self.score = 0
-        self.question_number = 0

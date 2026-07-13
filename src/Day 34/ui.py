@@ -1,4 +1,6 @@
 from tkinter import *
+from tkinter import messagebox
+
 from quiz_brain import QuizBrain
 
 THEME_COLOR = "#375362"
@@ -46,10 +48,15 @@ class QuizInterface:
         self.window.mainloop()
 
     def get_next_question(self):
-        if not self.quiz.still_has_questions():
-            self.quiz.refresh_question_bank()
-
         self._update_score_label()
+        if not self.quiz.still_has_questions():
+            messagebox.showinfo(
+                title="Quizzler: Question Set Complete!",
+                message=f"Question Set Complete!\n\nYour score was {self.quiz.score:02} / {self.quiz.question_number:02}",
+            )
+            self.quiz.refresh_question_bank()
+            self._update_score_label()
+
         question = self.quiz.next_question()
         self.canvas.itemconfig(self.question_text, text=question)
 
