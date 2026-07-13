@@ -7,7 +7,12 @@ URL = "https://opentdb.com/api.php"
 
 def fetch_data():
     print("Sending request to API...")
-    response = get(URL, params={"amount": 10, "category": 18, "type": "boolean"})
+    parameters = {
+        "amount": 15,
+        #   "category": 18,  # Uncomment this line to only include "Computer Science" quiz questions
+        "type": "boolean",
+    }
+    response = get(URL, params=parameters)
     response.raise_for_status()
 
     print("Successfully received response!")
