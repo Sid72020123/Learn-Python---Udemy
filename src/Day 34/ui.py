@@ -14,6 +14,7 @@ class QuizInterface:
         self.window.title("Quizzler")
 
         self.window.config(padx=20, pady=20, bg=THEME_COLOR)
+        self.next_question_timer = self.window.after(0, lambda: ...)
 
         self.score_label = Label(text="Score: 00 / 00", fg="white", bg=THEME_COLOR)
         self.score_label.grid(row=0, column=1)
@@ -48,8 +49,11 @@ class QuizInterface:
         self.window.mainloop()
 
     def get_next_question(self):
+        self.canvas.config(bg="white")
+        self.canvas.itemconfig(self.question_text, fill=THEME_COLOR)
         self._update_score_label()
         if not self.quiz.still_has_questions():
+            self.canvas.itemconfig(self.question_text, text="Question set complete!")
             messagebox.showinfo(
                 title="Quizzler: Question Set Complete!",
                 message=f"Question Set Complete!\n\nYour score was {self.quiz.score:02} / {self.quiz.question_number:02}",
@@ -69,10 +73,16 @@ class QuizInterface:
         is_correct = self.quiz.check_answer(t)
         if is_correct:
             self.quiz.score += 1
-        self.get_next_question()
+        self.give_feedback(is_correct)
 
     def tick_pressed(self):
         self._check_answer("True")
 
     def cross_pressed(self):
         self._check_answer("False")
+
+    def give_feedback(self, is_correct):
+        self.window.after_cancel(self.next_question_timer)
+        self.canvas.config(bg=("green" if is_correct else "red"))
+        self.canvas.itemconfig(self.question_text, fill="white")
+        self.next_question_timer = self.window.after(1000, self.get_next_question)
