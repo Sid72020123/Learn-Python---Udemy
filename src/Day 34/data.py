@@ -1,16 +1,33 @@
 from requests import get
 
+from question_model import Question
 
 URL = "https://opentdb.com/api.php"
 
-print("Sending request to API...")
-response = get(URL, params={"amount": 10, "category": 18, "type": "boolean"})
-response.raise_for_status()
 
-print("Successfully received response!")
+def fetch_data():
+    print("Sending request to API...")
+    response = get(URL, params={"amount": 10, "category": 18, "type": "boolean"})
+    response.raise_for_status()
 
-question_data = response.json()["results"]
-print(f"Fetched {len(question_data)} questions...")
+    print("Successfully received response!")
+
+    question_data = response.json()["results"]
+    print(f"Fetched {len(question_data)} questions...")
+
+    return question_data
+
+
+def get_question_bank():
+    question_data = fetch_data()
+    question_bank = []
+    for question in question_data:
+        question_text = question["question"]
+        question_answer = question["correct_answer"]
+        new_question = Question(question_text, question_answer)
+        question_bank.append(new_question)
+    return question_bank
+
 
 """
 question_data = [
