@@ -30,6 +30,7 @@ parameters = {
 }
 
 response = get(URL, params=parameters)
+print(response.url)
 response.raise_for_status()
 
 pprint(response.json())
