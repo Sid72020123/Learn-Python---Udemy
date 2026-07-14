@@ -9,7 +9,7 @@ ALPHAVANTAGE_API_KEY = os.environ.get("ALPHAVANTAGE_API_KEY", "demo")
 NEWS_API_KEY = os.environ.get("NEWS_API_KEY", "demo")
 
 STOCK = "TSLA"
-COMPANY_NAME = "Tesla Inc"
+COMPANY_NAME = "TESLA INC"
 
 STOCK_ENDPOINT = "https://www.alphavantage.co/query"
 NEWS_ENDPOINT = "https://newsapi.org/v2/everything"
@@ -37,10 +37,9 @@ def get_time_series_stock_data():
     )
 
     difference_percent = (difference / float(time_series_data[0]["4. close"])) * 100
-    print(difference_percent)
-    if difference_percent > 5:
-        print("Get News")
-    get_news()
+    print(f"Difference: {difference_percent:.2f} %\n\n")
+    if difference_percent > 1:
+        get_news()
 
 
 def get_news():
@@ -48,12 +47,17 @@ def get_news():
         "q": COMPANY_NAME,
         "apiKey": NEWS_API_KEY,
         "language": "en",
-        "pageSize": 5,
+        "pageSize": 10,
     }
     response = get(NEWS_ENDPOINT, params=parameters)
     response.raise_for_status()
 
-    print(response.json())
+    articles = response.json()["articles"]
+    print("=" * 25 + " News " + "=" * 25)
+    for index, article in enumerate(articles):
+        print(
+            f"\t[{index + 1:02}] {article['author']}, {article['source']['name']}: {article['title']}\n"
+        )
 
 
 get_time_series_stock_data()
