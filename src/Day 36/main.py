@@ -28,7 +28,18 @@ def get_time_series_stock_data():
     response = get(STOCK_ENDPOINT, params=parameters)
     response.raise_for_status()
 
-    print(response.json())
+    stock_data = response.json()
+    time_series_data = [value for _, value in stock_data["Time Series (Daily)"].items()]
+
+    difference = abs(
+        float(time_series_data[0]["4. close"]) - float(time_series_data[1]["4. close"])
+    )
+
+    difference_percent = (difference / float(time_series_data[0]["4. close"])) * 100
+    print(difference_percent)
+    if difference_percent > 5:
+        print("Get News")
+
 
 get_time_series_stock_data()
 ## STEP 2: Use https://newsapi.org
