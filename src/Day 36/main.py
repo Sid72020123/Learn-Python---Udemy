@@ -6,6 +6,7 @@ import requests_cache
 load_dotenv()
 
 ALPHAVANTAGE_API_KEY = os.environ.get("ALPHAVANTAGE_API_KEY", "demo")
+NEWS_API_KEY = os.environ.get("NEWS_API_KEY", "demo")
 
 STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
@@ -39,6 +40,20 @@ def get_time_series_stock_data():
     print(difference_percent)
     if difference_percent > 5:
         print("Get News")
+    get_news()
+
+
+def get_news():
+    parameters = {
+        "q": COMPANY_NAME,
+        "apiKey": NEWS_API_KEY,
+        "language": "en",
+        "pageSize": 5,
+    }
+    response = get(NEWS_ENDPOINT, params=parameters)
+    response.raise_for_status()
+
+    print(response.json())
 
 
 get_time_series_stock_data()
