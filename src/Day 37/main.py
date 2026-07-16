@@ -21,6 +21,7 @@ user_params = {
 
 # print(response.text)
 
+# Creating a graph
 graph_endpoint = f"{PIXELA_ENDPOINT}/{USERNAME}/graphs"
 graph_config = {
     "id": "test-graph",
@@ -30,5 +31,7 @@ graph_config = {
     "color": "ajisai",
 }
 
-response = post(graph_endpoint, json=graph_config)
+headers = {"X-USER-TOKEN": PIXELA_TOKEN}
+
+response = post(graph_endpoint, json=graph_config, headers=headers)
 print(response.text)
