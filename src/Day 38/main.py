@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from requests import post
+import datetime
 
 load_dotenv()
 
@@ -8,6 +9,8 @@ load_dotenv()
 
 APP_ID = os.environ.get("APP_ID")
 API_KEY = os.environ.get("API_KEY")
+SHEETS_API_URL = os.environ.get("SHEETS_API_URL")
+SHEETS_API_TOKEN = os.environ.get("SHEETS_API_TOKEN")
 
 headers = {
     "x-app-id": APP_ID,
@@ -17,11 +20,33 @@ headers = {
 
 BASE_URL = "https://app.100daysofpython.dev"
 
-### --- DATA --- ###
+### --- DATA from NLP --- ###
 
-data = {"query": "ran for 30 minutes"}
+data = {"query": input("What exercises did you do today? ")}
 
 response = post(f"{BASE_URL}/v1/nutrition/natural/exercise", headers=headers, json=data)
 response.raise_for_status()
 
-print(response.json())
+result = response.json()
+
+### --- Save DATA to Google Sheets --- ###
+
+date_today = datetime.datetime.now().strftime("%d/%m/%Y")
+time_now = datetime.datetime.now().strftime("%X")
+
+headers = {"Authorization": f"Bearer {SHEETS_API_TOKEN}"}
+
+for exercise in result["exercises"]:
+    data = {
+        "workout": {
+            "date": date_today,
+            "time": time_now,
+            "exercise": exercise["name"].title(),
+            "duration": exercise["duration_min"],
+            "calories": exercise["nf_calories"],
+        }
+    }
+
+    response = post(SHEETS_API_URL, json=data)
+
+    print(response.text)
