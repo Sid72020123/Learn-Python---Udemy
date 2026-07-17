@@ -28,6 +28,7 @@ response = post(f"{BASE_URL}/v1/nutrition/natural/exercise", headers=headers, js
 response.raise_for_status()
 
 result = response.json()
+print("NLP Result:", result)
 
 ### --- Save DATA to Google Sheets --- ###
 
@@ -47,6 +48,6 @@ for exercise in result["exercises"]:
         }
     }
 
-    response = post(SHEETS_API_URL, json=data)
+    response = post(SHEETS_API_URL, json=data, headers=headers)
 
-    print(response.text)
+    print("\nGoogle Sheets API Result", response.text)
