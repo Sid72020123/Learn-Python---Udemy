@@ -11,4 +11,4 @@ class DataManager:
 
     def get_rows_from_sheet(self):
         response = requests.get(self.SHEETY_API_URL, headers=self.headers)
-        return response.json()
+        return response.json()["prices"]
