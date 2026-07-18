@@ -19,3 +19,7 @@ class DataManager:
             f"{self.SHEETY_API_URL}/{row_id}", headers=self.headers, json=data
         )
         return response
+
+    def get_all_users(self, SHEETY_USERS_API_URL):
+        response = requests.get(SHEETY_USERS_API_URL, headers=self.headers)
+        return response.json()["users"]

@@ -11,13 +11,13 @@ SENDER_EMAIL = os.environ.get("EMAIL_FROM")
 RECIPIENT_EMAIL = os.environ.get("RECIPIENT_EMAIL")
 
 
-def send_email_alert(flight):
-    content = f"""Loweest Price alert for flight from {flight.departure_airport_id} [{flight.departure_time}] to {flight.arrival_airport_id} [{flight.arrival_time}]! Price: {flight.price}"""
+def send_email_alert(flight, email=RECIPIENT_EMAIL):
+    content = f"""Lowest Price alert for flight from {flight.departure_airport_id} [{flight.departure_time}] to {flight.arrival_airport_id} [{flight.arrival_time}]! Price: {flight.price}"""
 
     msg = EmailMessage()
     msg["Subject"] = "Cheap Flight Alert!"
     msg["From"] = SENDER_EMAIL
-    msg["To"] = RECIPIENT_EMAIL
+    msg["To"] = email
     msg.set_content(content)
 
     with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as smtp:

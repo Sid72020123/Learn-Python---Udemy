@@ -12,6 +12,7 @@ from notification_manager import send_email_alert
 APP_ID = os.environ.get("APP_ID")
 APP_KEY = os.environ.get("APP_KEY")
 SHEETY_API_URL = os.environ.get("SHEETY_API_URL")
+SHEETY_USERS_API_URL = os.environ.get("SHEETY_USERS_API_URL")
 SHEETY_API_TOKEN = os.environ.get("SHEETY_API_TOKEN")
 DEPARTURE_CITY_ID = os.environ.get("DEPARTURE_CITY_ID")
 
@@ -23,7 +24,8 @@ dm = DataManager(SHEETY_API_URL, SHEETY_API_TOKEN)
 fs = FlightSearch(APP_ID, APP_KEY, DEPARTURE_CITY_ID)
 
 CITIES = dm.get_rows_from_sheet()
-
+USERS = dm.get_all_users(SHEETY_USERS_API_URL)
+print(USERS)
 
 for city in CITIES:
     cheapest_flight = fs.get_cheapest_flight(
@@ -35,4 +37,6 @@ for city in CITIES:
     dm.update_price(city["id"], cheapest_flight.price)
 
     if cheapest_flight.price < city["lowestPrice"]:
-        send_email_alert(cheapest_flight)
+        send_email_alert(flight=cheapest_flight)
+        for user in USERS:
+            send_email_alert(flight=cheapest_flight, email=user["email"])

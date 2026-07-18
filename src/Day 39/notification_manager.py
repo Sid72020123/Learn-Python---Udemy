@@ -12,7 +12,7 @@ RECIPIENT_EMAIL = os.environ.get("RECIPIENT_EMAIL")
 
 
 def send_email_alert(flight):
-    content = f"""Loweest Price alert for flight from {flight.departure_airport_id} [{flight.departure_time}] to {flight.arrival_airport_id} [{flight.arrival_time}]! Price: {flight.price}"""
+    content = f"""Lowest Price alert for flight from {flight.departure_airport_id} [{flight.departure_time}] to {flight.arrival_airport_id} [{flight.arrival_time}]! Price: {flight.price}"""
 
     msg = EmailMessage()
     msg["Subject"] = "Cheap Flight Alert!"
