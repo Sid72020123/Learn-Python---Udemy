@@ -7,6 +7,8 @@ from flight_search import FlightSearch
 
 load_dotenv()
 
+from notification_manager import send_email_alert
+
 APP_ID = os.environ.get("APP_ID")
 APP_KEY = os.environ.get("APP_KEY")
 SHEETY_API_URL = os.environ.get("SHEETY_API_URL")
@@ -24,11 +26,13 @@ CITIES = dm.get_rows_from_sheet()
 
 
 for city in CITIES:
-    print(
-        fs.get_cheapest_flight(
-            city,
-            tomorrow.strftime("%Y-%m-%d"),
-            six_month_later.strftime("%Y-%m-%d"),
-        )
+    cheapest_flight = fs.get_cheapest_flight(
+        city,
+        tomorrow.strftime("%Y-%m-%d"),
+        six_month_later.strftime("%Y-%m-%d"),
     )
-    print("\n" * 3)
+
+    dm.update_price(city["id"], cheapest_flight.price)
+
+    if cheapest_flight.price < city["lowestPrice"]:
+        send_email_alert(cheapest_flight)
