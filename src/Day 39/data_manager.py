@@ -1,3 +1,14 @@
+import requests
+import requests_cache
+
+requests_cache.install_cache("sheety_api_cache")
+
+
 class DataManager:
-    #This class is responsible for talking to the Google Sheet.
-    pass
+    def __init__(self, SHEETY_API_URL, SHEETY_API_TOKEN):
+        self.SHEETY_API_URL = SHEETY_API_URL
+        self.headers = {"Authorization": f"Bearer {SHEETY_API_TOKEN}"}
+
+    def get_rows_from_sheet(self):
+        response = requests.get(self.SHEETY_API_URL, headers=self.headers)
+        return response.json()
