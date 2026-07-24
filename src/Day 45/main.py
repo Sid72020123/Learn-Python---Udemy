@@ -50,6 +50,37 @@ content = response.content
 
 soup = BeautifulSoup(content, "html.parser")
 
-titles = soup.select(".titleline a")
+# articles_table = soup.find("tr", id="bigbox").find_all("tr")
 
-print(titles)
+# for article in articles_table:
+#     print(article)
+#     title_info = soup.find("span", class_="titleline").find("a")
+#     title_name = title_info.string
+#     title_link = title_info.get("href")
+#     print(title_name, title_link)
+
+titles = soup.find_all("span", class_="titleline")
+scores = soup.select(".subline span.score")
+
+titles_texts = []
+titles_links = []
+titles_scores = []
+
+for index, title in enumerate(titles):
+    link = title.find("a")
+    if link and scores[index]:
+        score = int(scores[index].getText().replace(" points", ""))
+
+        titles_texts.append(link.getText())
+        titles_links.append(link.get("href"))
+        titles_scores.append(score)
+
+# combined_data = zip(titles_texts, titles_links, titles_scores)
+# print(max(combined_data, key=lambda x: x[2]))
+
+combined_data = sorted(
+    zip(titles_texts, titles_links, titles_scores), key=lambda x: x[2], reverse=True
+)
+
+for data in combined_data:
+    print(f"[{data[2]:04}] {data[0]} => {data[1]}")
