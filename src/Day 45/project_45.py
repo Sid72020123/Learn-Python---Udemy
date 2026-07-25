@@ -1,5 +1,5 @@
-from requests import get
 from bs4 import BeautifulSoup
+from requests import get
 
 URL = "https://www.empireonline.com/movies/features/best-movies-2/"
 
