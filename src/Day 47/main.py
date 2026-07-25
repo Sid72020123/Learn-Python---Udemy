@@ -6,8 +6,10 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from requests import get
 
-URL = "https://appbrewery.github.io/instant_pot/"
 load_dotenv()
+
+URL = os.environ.get("PRODUCT_URL")
+
 SMTP_SERVER = os.environ.get("SMTP_SERVER")
 SMTP_PORT = int(os.environ.get("SMTP_PORT"))
 USERNAME = os.environ.get("EMAIL_USERNAME")
@@ -15,11 +17,11 @@ PASSWORD = os.environ.get("SMTP_KEY")
 SENDER_EMAIL = os.environ.get("EMAIL_FROM")
 RECIPIENT_EMAIL = os.environ.get("RECIPIENT_EMAIL")
 
-MIN_PRICE_LIMIT = 100
+MIN_PRICE_LIMIT = 250
 
 
 def send_email(price):
-    content = f"""Low price alert for product!\nThe price today is {price}!"""
+    content = f"""Low price alert for product!\nThe price today is ₹{price}!"""
 
     msg = EmailMessage()
     msg["Subject"] = "Product Price Alert!"
@@ -38,7 +40,8 @@ def send_email(price):
 response = get(
     URL,
     headers={
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.3 Safari/537.36"
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.3 Safari/537.36",
+        "Accept-Language": "en-US",
     },
 )
 
@@ -49,9 +52,9 @@ content = response.content
 
 soup = BeautifulSoup(content, "html.parser")
 
-price = float(soup.find("span", class_="a-offscreen").get_text().split("$")[1])
+price = float(soup.find("span", class_="a-offscreen").get_text().split("₹")[1])
 
-print("Product Price:", price)
+print(f"Product Price: ₹{price}")
 
 if price <= MIN_PRICE_LIMIT:
     send_email(price)
