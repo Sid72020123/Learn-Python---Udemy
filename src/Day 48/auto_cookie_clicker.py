@@ -28,9 +28,6 @@ language_select.click()
 
 sleep(5)  # Wait for the game to load completely
 
-# Products #1 - #19
-product_ids = [f"product{i}" for i in range(20)]
-
 cookie_button = driver.find_element(By.ID, "bigCookie")
 
 
@@ -47,12 +44,12 @@ def get_best_product():
 # Set timers
 wait_time = 15
 timeout = time() + wait_time  # Check for purchases every 5 seconds
-fifteen_min = time() + 60 * 15  # Run for 15 minutes
+twenty_min = time() + 60 * 20  # Run for 20 minutes
 
 while True:
     cookie_button.click()
 
-    # Every 15 seconds, try to buy the most expensive item we can afford
+    # Every 20 seconds, try to buy the most expensive item we can afford
     if time() > timeout:
         try:
             # Get current cookie count
@@ -74,8 +71,8 @@ while True:
         # Reset timer
         timeout = time() + wait_time
 
-    # Stop after 15 minutes
-    if time() > fifteen_min:
+    # Stop after 20 minutes
+    if time() > twenty_min:
         try:
             cookies_element = driver.find_element(by=By.ID, value="cookies")
             print(f"Final result: {cookies_element.text}")
