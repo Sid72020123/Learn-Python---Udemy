@@ -1,11 +1,11 @@
 import os
-from pprint import pprint
+from time import sleep
 
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 user_data_dir = os.path.join(os.getcwd(), "chrome_profile")
 
@@ -104,6 +104,59 @@ def get_class_schedules():
     return details
 
 
+def get_bookings_list():
+    confirmed_bookings_section = driver.find_element(
+        By.ID, "confirmed-bookings-section"
+    )
+    waitlist_section = driver.find_element(By.ID, "waitlist-section")
+
+    bookings_info = confirmed_bookings_section.find_elements(
+        By.CLASS_NAME, "MyBookings_bookingCard__VRdrR"
+    )
+
+    waitlists_info = waitlist_section.find_elements(
+        By.CLASS_NAME, "MyBookings_waitlist__rD_tl"
+    )
+
+    combined_bookings_info = list(bookings_info + waitlists_info)
+
+    BOOKINGS = []
+
+    for each_booking in combined_bookings_info:
+        class_type = "booked"
+        class_name = (
+            each_booking.find_element(By.TAG_NAME, "h3")
+            .text.replace("Class", "")
+            .strip()
+        )
+        if "(Waitlist)" in class_name:
+            class_type = "waitlisted"
+            class_name = class_name.replace("(Waitlist)", "").strip()
+        class_details = each_booking.find_elements(By.TAG_NAME, "p")
+        class_time = class_details[0].text.replace("When:", "")
+        class_day = class_time.split(",")[0].strip()
+        class_date = class_time.split(",")[1].strip()
+        class_time = class_time.split(",")[2].strip()
+        class_instructor = str(class_details[1].text.replace("Instructor:", "")).strip()
+        class_duration = (
+            str(class_details[2].text.replace("Duration:", "")).strip()
+            if class_type == "booked"
+            else None
+        )
+        BOOKINGS.append(
+            {
+                "type": class_type,
+                "name": class_name,
+                "day": class_day,
+                "date": class_date,
+                "time": class_time,
+                "instructor": class_instructor,
+                "duration": class_duration,
+            }
+        )
+    return BOOKINGS
+
+
 CLASS_SCHEDULES = get_class_schedules()
 
 # pprint(get_class_schedules())
@@ -137,7 +190,7 @@ BOOKING_TYPES = {
 
 BOOKING_LOGS = []
 
-pprint(CLASS_SCHEDULES)
+# print(CLASS_SCHEDULES)
 
 for schedule in CLASS_SCHEDULES:
     if schedule in ["Tue", "Wed", "Thu"]:
@@ -166,3 +219,10 @@ for bt in BOOKING_TYPES.values():
 print("\n=== *** DETAILED CLASS LIST *** ===")
 for bl in BOOKING_LOGS:
     print(f"\t* [{bl['type']}] {bl['text']}")
+
+sleep(1)
+
+driver.find_element(By.ID, "my-bookings-link").click()
+wait.until(EC.presence_of_element_located((By.ID, "my-bookings-page")))
+
+print(get_bookings_list())
