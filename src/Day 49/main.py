@@ -123,7 +123,7 @@ def get_bookings_list():
     BOOKINGS = []
 
     for each_booking in combined_bookings_info:
-        class_type = "booked"
+        class_type = "booking"
         class_name = (
             each_booking.find_element(By.TAG_NAME, "h3")
             .text.replace("Class", "")
@@ -157,6 +157,17 @@ def get_bookings_list():
     return BOOKINGS
 
 
+def verify_booking(query, ALL_BOOKINGS):
+    KEYS = ["name", "day", "date", "time"]
+    for booking in ALL_BOOKINGS:
+        if query["verify_type"] == booking["type"]:
+            for key in KEYS:
+                if query[key] != booking[key]:
+                    continue
+            return True
+    return False
+
+
 CLASS_SCHEDULES = get_class_schedules()
 
 # pprint(get_class_schedules())
@@ -167,24 +178,28 @@ BOOKING_TYPES = {
         "count": 0,
         "summary_text": "already booked classes",
         "detailed_summary_text": "Already Booked",
+        "verify_id": "booking",
     },
     "Waitlisted": {
         "text": "already on waitlist",
         "count": 0,
         "summary_text": "already joined waitlists",
         "detailed_summary_text": "Already on Waitlist",
+        "verify_id": "waitlisted",
     },
     "Join Waitlist": {
         "text": "joined waitlist",
         "count": 0,
         "summary_text": "waitlists joined",
         "detailed_summary_text": "New Waitlist",
+        "verify_id": "waitlisted",
     },
     "Book Class": {
         "text": "booked",
         "count": 0,
         "summary_text": "classes booked",
         "detailed_summary_text": "New Booking",
+        "verify_id": "booking",
     },
 }
 
@@ -198,7 +213,7 @@ for schedule in CLASS_SCHEDULES:
             if class_info["time"] == "6:00 PM":
                 button = driver.find_element(By.ID, class_info["button_id"])
                 button_text = button.text.strip()
-                button.click()
+                # button.click()
 
                 BOOKING_TYPES[button_text]["count"] += 1
                 booking_type_text = BOOKING_TYPES[button_text]["text"]
@@ -208,7 +223,12 @@ for schedule in CLASS_SCHEDULES:
                 BOOKING_LOGS.append(
                     {
                         "type": BOOKING_TYPES[button_text]["detailed_summary_text"],
+                        "name": class_info["name"],
                         "text": booking_info_text,
+                        "day": schedule,
+                        "date": class_info["date"],
+                        "time": class_info["time"],
+                        "verify_type": BOOKING_TYPES[button_text]["verify_id"],
                     }
                 )
 
@@ -225,4 +245,24 @@ sleep(1)
 driver.find_element(By.ID, "my-bookings-link").click()
 wait.until(EC.presence_of_element_located((By.ID, "my-bookings-page")))
 
-print(get_bookings_list())
+ALL_BOOKINGS = get_bookings_list()
+
+print("\n=== *** VERIFICATION *** ===")
+
+verification_count = 0
+for booking in BOOKING_LOGS:
+    if verify_booking(booking, ALL_BOOKINGS):
+        verification_count += 1
+        print(
+            f"\t✓ Verified: {booking['name']} Class {"(Waitlist)" if booking['verify_type'] == 'waitlisted' else ''}"
+        )
+
+print("\n=== *** VERIFICATION RESULT *** ===")
+
+print(f"Expected: {len(BOOKING_LOGS)} bookings")
+print(f"Found: {verification_count} bookings")
+
+if len(BOOKING_LOGS) == verification_count:
+    print("✅ SUCCESS: All bookings verified!")
+else:
+    print(f"❌ MISMATCH: Missing {len(BOOKING_LOGS) - verification_count} bookings")
