@@ -47,21 +47,22 @@ wait.until(
 
 def get_class_schedules():
     raw_schedules = driver.find_elements(By.CLASS_NAME, "Schedule_dayGroup__y79__")
-    print(raw_schedules)
     details = {}
     for schedule in raw_schedules:
         schedule_day = schedule.find_element(By.TAG_NAME, "h2").text
         if "(" in schedule_day:
+            schedule_date = (
+                schedule_day.split("(")[1].split(",")[1].replace(")", "").strip()
+            )
             schedule_day = schedule_day.split("(")[1].split(",")[0]
         else:
+            schedule_date = schedule_day.split(",")[1].strip()
             schedule_day = schedule_day.split(",")[0]
-        print(schedule_day)
         details[schedule_day] = []
 
         gym_classes = schedule.find_elements(By.CLASS_NAME, "ClassCard_card__KpCx5")
 
         for gym_class in gym_classes:
-
             class_name = (
                 gym_class.find_element(By.TAG_NAME, "h3")
                 .text.replace("Class", "")
@@ -83,20 +84,16 @@ def get_class_schedules():
                 .split("/")
             )
 
-            card_actions = driver.find_element(
+            card_actions = gym_class.find_element(
                 By.CLASS_NAME, "ClassCard_cardActions__tVZBm"
             )
-            button_id = card_actions.find_element(By.TAG_NAME, "button").id
-            print(
-                class_name,
-                class_time,
-                class_instructor,
-                class_duration,
-                seats_available,
-                button_id,
+            button_id = card_actions.find_element(By.TAG_NAME, "button").get_attribute(
+                "id"
             )
+
             class_dict = {
                 "name": class_name,
+                "date": schedule_date,
                 "time": class_time,
                 "instructor": class_instructor,
                 "duration": class_duration,
@@ -104,8 +101,21 @@ def get_class_schedules():
                 "button_id": button_id,
             }
             details[schedule_day].append(class_dict)
-        print("*" * 50)
     return details
 
 
-pprint(get_class_schedules())
+CLASS_SCHEDULES = get_class_schedules()
+
+# pprint(get_class_schedules())
+
+
+pprint(CLASS_SCHEDULES)
+
+tuesday_schedule = CLASS_SCHEDULES["Tue"]
+
+for class_info in tuesday_schedule:
+    if class_info["time"] == "6:00 PM":
+        driver.find_element(By.ID, class_info["button_id"]).click()
+        print(
+            f"✓ Booked: {class_info['name']} Class on Tue, {class_info['date']} {class_info['time']}"
+        )
