@@ -2,7 +2,7 @@ import os
 from time import sleep
 
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -27,22 +27,35 @@ driver.get(GYM_URL)
 
 wait = WebDriverWait(driver, 2)
 
-login_button = wait.until(EC.element_to_be_clickable((By.ID, "login-button")))
-login_button.click()
 
-email_entry = wait.until(EC.presence_of_element_located((By.ID, "email-input")))
-password_entry = driver.find_element(By.ID, "password-input")
-login_submit_button = driver.find_element(By.ID, "submit-button")
+def retry(func, retries=7, description=None):
+    for i in range(retries):
+        print(f"==> Trying '{description}'. Attempt: {i + 1}")
+        try:
+            return func()
+        except TimeoutException:
+            if i == retries - 1:
+                raise
+            sleep(1)
 
-email_entry.clear()
-email_entry.send_keys(ACCOUNT_EMAIL)
-password_entry.clear()
-password_entry.send_keys(ACCOUNT_PASSWORD)
-login_submit_button.click()
 
-wait.until(
-    EC.presence_of_element_located((By.ID, "schedule-page"))
-)  # Wait until successful login
+def login():
+    login_button = wait.until(EC.element_to_be_clickable((By.ID, "login-button")))
+    login_button.click()
+
+    email_entry = wait.until(EC.presence_of_element_located((By.ID, "email-input")))
+    password_entry = driver.find_element(By.ID, "password-input")
+    login_submit_button = driver.find_element(By.ID, "submit-button")
+
+    email_entry.clear()
+    email_entry.send_keys(ACCOUNT_EMAIL)
+    password_entry.clear()
+    password_entry.send_keys(ACCOUNT_PASSWORD)
+    login_submit_button.click()
+
+    wait.until(
+        EC.presence_of_element_located((By.ID, "schedule-page"))
+    )  # Wait until successful login
 
 
 def get_class_schedules():
@@ -173,9 +186,82 @@ def verify_booking(query, ALL_BOOKINGS):
     return False
 
 
-CLASS_SCHEDULES = get_class_schedules()
+def click_button(button):
+    button.click()
+    # Wait for button state to change - will time out if booking failed
+    wait.until(lambda d: button.text in ["Booked", "Waitlisted"])
 
-# pprint(get_class_schedules())
+
+def book_classes(days=None, time="6:00 PM"):
+    CLASS_SCHEDULES = get_class_schedules()
+    if days is None:
+        days = ["Wed", "Thu"]
+    for schedule in CLASS_SCHEDULES:
+        if schedule in days:
+            for class_info in CLASS_SCHEDULES[schedule]:
+                if class_info["time"] == time:
+                    button = driver.find_element(By.ID, class_info["button_id"])
+                    button_text = button.text.strip()
+                    retry(
+                        lambda: click_button(button),
+                        description=f"Clicking button {class_info['button_id']}",
+                    )
+
+                    BOOKING_TYPES[button_text]["count"] += 1
+                    booking_type_text = BOOKING_TYPES[button_text]["text"]
+                    booking_info_text = f"{class_info['name']} Class on {schedule}, {class_info['date']} {class_info['time']}"
+                    print(f"✓ {booking_type_text.capitalize()}: {booking_info_text}")
+
+                    BOOKING_LOGS.append(
+                        {
+                            "type": BOOKING_TYPES[button_text]["detailed_summary_text"],
+                            "name": class_info["name"],
+                            "text": booking_info_text,
+                            "day": schedule,
+                            "date": class_info["date"],
+                            "time": class_info["time"],
+                            "verify_type": BOOKING_TYPES[button_text]["verify_id"],
+                        }
+                    )
+
+
+def print_final_summary():
+    print("\n=== *** BOOKING SUMMARY *** ===")
+    for bt in BOOKING_TYPES.values():
+        print(f"[*] {bt['summary_text'].title()}: {bt['count']}")
+
+    print("\n=== *** DETAILED CLASS LIST *** ===")
+    for bl in BOOKING_LOGS:
+        print(f"\t* [{bl['type']}] {bl['text']}")
+
+
+def auto_verify_bookings():
+    driver.find_element(By.ID, "my-bookings-link").click()
+    wait.until(EC.presence_of_element_located((By.ID, "my-bookings-page")))
+
+    ALL_BOOKINGS = get_bookings_list()
+
+    print("\n=== *** VERIFICATION *** ===")
+    verification_count = 0
+    for booking in BOOKING_LOGS:
+        if verify_booking(booking, ALL_BOOKINGS):
+            verification_count += 1
+            print(
+                f"\t✓ Verified: {booking['name']} Class {"(Waitlist)" if booking['verify_type'] == 'waitlisted' else ''}"
+            )
+    if verification_count == 0:
+        print("\t(No bookings found)")
+
+    print("\n=== *** VERIFICATION RESULT *** ===")
+
+    print(f"Expected: {len(BOOKING_LOGS)} bookings")
+    print(f"Found: {verification_count} bookings")
+
+    if len(BOOKING_LOGS) == verification_count:
+        print("✅ SUCCESS: All bookings verified!")
+    else:
+        print(f"❌ MISMATCH: Missing {len(BOOKING_LOGS) - verification_count} bookings")
+
 
 BOOKING_TYPES = {
     "Booked": {
@@ -210,65 +296,11 @@ BOOKING_TYPES = {
 
 BOOKING_LOGS = []
 
-# print(CLASS_SCHEDULES)
-
-for schedule in CLASS_SCHEDULES:
-    if schedule in ["Wed", "Thu"]:
-        for class_info in CLASS_SCHEDULES[schedule]:
-            if class_info["time"] == "6:00 PM":
-                button = driver.find_element(By.ID, class_info["button_id"])
-                button_text = button.text.strip()
-                button.click()
-
-                BOOKING_TYPES[button_text]["count"] += 1
-                booking_type_text = BOOKING_TYPES[button_text]["text"]
-                booking_info_text = f"{class_info['name']} Class on {schedule}, {class_info['date']} {class_info['time']}"
-                print(f"✓ {booking_type_text.capitalize()}: {booking_info_text}")
-
-                BOOKING_LOGS.append(
-                    {
-                        "type": BOOKING_TYPES[button_text]["detailed_summary_text"],
-                        "name": class_info["name"],
-                        "text": booking_info_text,
-                        "day": schedule,
-                        "date": class_info["date"],
-                        "time": class_info["time"],
-                        "verify_type": BOOKING_TYPES[button_text]["verify_id"],
-                    }
-                )
-
-print("\n=== *** BOOKING SUMMARY *** ===")
-for bt in BOOKING_TYPES.values():
-    print(f"[*] {bt['summary_text'].title()}: {bt['count']}")
-
-print("\n=== *** DETAILED CLASS LIST *** ===")
-for bl in BOOKING_LOGS:
-    print(f"\t* [{bl['type']}] {bl['text']}")
-
+retry(login, description="Login")
+retry(
+    lambda: book_classes(days=["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]),
+    description="Book Classes",
+)
+print_final_summary()
 sleep(1)
-
-driver.find_element(By.ID, "my-bookings-link").click()
-wait.until(EC.presence_of_element_located((By.ID, "my-bookings-page")))
-
-ALL_BOOKINGS = get_bookings_list()
-
-print("\n=== *** VERIFICATION *** ===")
-verification_count = 0
-for booking in BOOKING_LOGS:
-    if verify_booking(booking, ALL_BOOKINGS):
-        verification_count += 1
-        print(
-            f"\t✓ Verified: {booking['name']} Class {"(Waitlist)" if booking['verify_type'] == 'waitlisted' else ''}"
-        )
-if verification_count == 0:
-    print(f"\t(No bookings found)")
-
-print("\n=== *** VERIFICATION RESULT *** ===")
-
-print(f"Expected: {len(BOOKING_LOGS)} bookings")
-print(f"Found: {verification_count} bookings")
-
-if len(BOOKING_LOGS) == verification_count:
-    print("✅ SUCCESS: All bookings verified!")
-else:
-    print(f"❌ MISMATCH: Missing {len(BOOKING_LOGS) - verification_count} bookings")
+retry(auto_verify_bookings, description="Auto Verify Bookings")
