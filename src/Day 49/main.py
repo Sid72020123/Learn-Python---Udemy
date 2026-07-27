@@ -108,14 +108,61 @@ CLASS_SCHEDULES = get_class_schedules()
 
 # pprint(get_class_schedules())
 
+BOOKING_TYPES = {
+    "Booked": {
+        "text": "already booked",
+        "count": 0,
+        "summary_text": "already booked classes",
+        "detailed_summary_text": "Already Booked",
+    },
+    "Waitlisted": {
+        "text": "already on waitlist",
+        "count": 0,
+        "summary_text": "already joined waitlists",
+        "detailed_summary_text": "Already on Waitlist",
+    },
+    "Join Waitlist": {
+        "text": "joined waitlist",
+        "count": 0,
+        "summary_text": "waitlists joined",
+        "detailed_summary_text": "New Waitlist",
+    },
+    "Book Class": {
+        "text": "booked",
+        "count": 0,
+        "summary_text": "classes booked",
+        "detailed_summary_text": "New Booking",
+    },
+}
+
+BOOKING_LOGS = []
 
 pprint(CLASS_SCHEDULES)
 
-tuesday_schedule = CLASS_SCHEDULES["Tue"]
+for schedule in CLASS_SCHEDULES:
+    if schedule in ["Tue", "Wed", "Thu"]:
+        for class_info in CLASS_SCHEDULES[schedule]:
+            if class_info["time"] == "6:00 PM":
+                button = driver.find_element(By.ID, class_info["button_id"])
+                button_text = button.text.strip()
+                button.click()
 
-for class_info in tuesday_schedule:
-    if class_info["time"] == "6:00 PM":
-        driver.find_element(By.ID, class_info["button_id"]).click()
-        print(
-            f"✓ Booked: {class_info['name']} Class on Tue, {class_info['date']} {class_info['time']}"
-        )
+                BOOKING_TYPES[button_text]["count"] += 1
+                booking_type_text = BOOKING_TYPES[button_text]["text"]
+                booking_info_text = f"{class_info['name']} Class on {schedule}, {class_info['date']} {class_info['time']}"
+                print(f"✓ {booking_type_text.capitalize()}: {booking_info_text}")
+
+                BOOKING_LOGS.append(
+                    {
+                        "type": BOOKING_TYPES[button_text]["detailed_summary_text"],
+                        "text": booking_info_text,
+                    }
+                )
+
+print("\n=== *** BOOKING SUMMARY *** ===")
+for bt in BOOKING_TYPES.values():
+    print(f"[*] {bt['summary_text'].title()}: {bt['count']}")
+
+print("\n=== *** DETAILED CLASS LIST *** ===")
+for bl in BOOKING_LOGS:
+    print(f"\t* [{bl['type']}] {bl['text']}")
