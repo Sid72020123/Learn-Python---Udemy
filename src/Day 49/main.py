@@ -105,18 +105,23 @@ def get_class_schedules():
 
 
 def get_bookings_list():
-    confirmed_bookings_section = driver.find_element(
-        By.ID, "confirmed-bookings-section"
-    )
-    waitlist_section = driver.find_element(By.ID, "waitlist-section")
+    try:
+        confirmed_bookings_section = driver.find_element(
+            By.ID, "confirmed-bookings-section"
+        )
+        bookings_info = confirmed_bookings_section.find_elements(
+            By.CLASS_NAME, "MyBookings_bookingCard__VRdrR"
+        )
+    except NoSuchElementException:
+        bookings_info = []
 
-    bookings_info = confirmed_bookings_section.find_elements(
-        By.CLASS_NAME, "MyBookings_bookingCard__VRdrR"
-    )
-
-    waitlists_info = waitlist_section.find_elements(
-        By.CLASS_NAME, "MyBookings_waitlist__rD_tl"
-    )
+    try:
+        waitlist_section = driver.find_element(By.ID, "waitlist-section")
+        waitlists_info = waitlist_section.find_elements(
+            By.CLASS_NAME, "MyBookings_waitlist__rD_tl"
+        )
+    except NoSuchElementException:
+        waitlists_info = []
 
     combined_bookings_info = list(bookings_info + waitlists_info)
 
@@ -208,12 +213,12 @@ BOOKING_LOGS = []
 # print(CLASS_SCHEDULES)
 
 for schedule in CLASS_SCHEDULES:
-    if schedule in ["Tue", "Wed", "Thu"]:
+    if schedule in ["Wed", "Thu"]:
         for class_info in CLASS_SCHEDULES[schedule]:
             if class_info["time"] == "6:00 PM":
                 button = driver.find_element(By.ID, class_info["button_id"])
                 button_text = button.text.strip()
-                # button.click()
+                button.click()
 
                 BOOKING_TYPES[button_text]["count"] += 1
                 booking_type_text = BOOKING_TYPES[button_text]["text"]
@@ -248,7 +253,6 @@ wait.until(EC.presence_of_element_located((By.ID, "my-bookings-page")))
 ALL_BOOKINGS = get_bookings_list()
 
 print("\n=== *** VERIFICATION *** ===")
-
 verification_count = 0
 for booking in BOOKING_LOGS:
     if verify_booking(booking, ALL_BOOKINGS):
@@ -256,6 +260,8 @@ for booking in BOOKING_LOGS:
         print(
             f"\t✓ Verified: {booking['name']} Class {"(Waitlist)" if booking['verify_type'] == 'waitlisted' else ''}"
         )
+if verification_count == 0:
+    print(f"\t(No bookings found)")
 
 print("\n=== *** VERIFICATION RESULT *** ===")
 
