@@ -1,12 +1,16 @@
+import os
+from dotenv import load_dotenv
+
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import ElementClickInterceptedException
 import time
 
+load_dotenv()
 SIMILAR_ACCOUNT = "chefsteps"  # the account whose followers you'll follow
-USERNAME = "your-email"  # your Share-a-Naan username (your email)
-PASSWORD = "your-pw"  # from your Share-a-Naan profile page
+USERNAME = os.environ.get("EMAIL")  # your Share-a-Naan username (your email)
+PASSWORD = os.environ.get("PASSWORD")  # from your Share-a-Naan profile page
 
 BASE_URL = "https://app.100daysofpython.dev/services/share-a-naan"
 LOGIN_URL = f"{BASE_URL}/login"
