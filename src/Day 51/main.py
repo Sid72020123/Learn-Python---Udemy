@@ -29,15 +29,19 @@ class InternetSpeedYBot:
         ).click()
         time.sleep(60)
         self.down = self.driver.find_element(
-            By.CSS_SELECTOR, value=".download-speed"
+            By.CSS_SELECTOR,
+            value="div.gap-8:nth-child(1) > div:nth-child(1) > div:nth-child(2) > h3:nth-child(2)",
         ).text
-        self.up = self.driver.find_element(By.CSS_SELECTOR, value=".upload-speed").text
+        self.up = self.driver.find_element(
+            By.CSS_SELECTOR,
+            value="div.gap-8:nth-child(1) > div:nth-child(2) > div:nth-child(2) > h3:nth-child(2)",
+        ).text
 
     def tweet_at_provider(self):
         self.driver.get(Y_LOGIN_URL)
         time.sleep(2)
 
-        self.driver.find_element(By.NAME, value="username").send_keys(Y_EMAIL)
+        self.driver.find_element(By.NAME, value="email").send_keys(Y_EMAIL)
         password = self.driver.find_element(By.NAME, value="password")
         password.send_keys(Y_PASSWORD)
         password.send_keys(Keys.ENTER)
