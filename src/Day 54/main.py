@@ -27,40 +27,46 @@
 # Python Decorator Function
 
 from time import sleep
-from random import randint
 
 
-def decorator_function(function):
-    print(f"I'm inside decorator function. Argument passed: {function}")
+def decorator_factory(delay):
+    print(f"I'm inside the decorator factory. Argument passed: {delay}")
 
-    def wrapper_function():
-        delay = randint(1, 5)
-        print(f"Delaying for {delay} seconds...")
-        sleep(delay)
-        print("Calling the passed function...")
-        function()
+    def decorator_function(function):
+        print(f"I'm inside decorator function. Argument passed: {function}")
 
-    return wrapper_function
+        def wrapper_function():
+            print(f"Delaying for {delay} seconds...")
+            sleep(delay)
+            print("Calling the passed function...")
+            function()
+
+        return wrapper_function
+
+    return decorator_function
 
 
-@decorator_function
+@decorator_factory(3)
 def say_hello():
     print("Hello!")
 
 
-@decorator_function
+@decorator_factory(2)
 def say_bye():
     print("Bye!")
 
 
-@decorator_function
+@decorator_factory(5)
 def say_greeting():
     print("How are you?")
 
 
 say_hello()
+say_greeting()
+say_bye()
 
 
+"""
 # --- Coding Exercise 22 ---
 import time
 
@@ -93,3 +99,4 @@ def slow_function():
 
 fast_function()
 slow_function()
+"""
