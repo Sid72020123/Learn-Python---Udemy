@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.get("/")
 def hello_world():
-    return "Hello World!"
+    return "<h1>Hello World!</h1>"
 
 
 @app.get("/bye")
@@ -16,8 +16,8 @@ def bye():
 
 @app.get("/username/<name>")
 def greet(name):
-    return f"Hello, {name}!"
+    return f"Hello, {name + 12}!"
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
