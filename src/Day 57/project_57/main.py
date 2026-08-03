@@ -21,7 +21,7 @@ def get_post(n):
 
     post = response.json()[n - 1]
 
-    return render_template("post.html", post=post)
+    return render_template("post.html", post=post, pn=n)
 
 
 if __name__ == "__main__":
