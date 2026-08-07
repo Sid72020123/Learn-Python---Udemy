@@ -1,16 +1,35 @@
-from flask import Flask, render_template, request
+from requests import get
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
 
-@app.route("/")
+def get_posts():
+    response = get("https://api.npoint.io/674f5423f73deab1e9a7")
+    response.raise_for_status()
+
+    return response.json()
+
+
+@app.get("/")
 def root():
-    return render_template("index.html")
+    return render_template("index.html", posts=get_posts())
 
 
-@app.route("/login", methods=["POST"])
-def login():
-    return f"<h3>Name: <i>{request.form['name']}</i></h3><h3>Password: <i>{request.form['password']}</i></h3>"
+@app.get("/post/<int:n>")
+def post(n):
+    post_content = get_posts()[n - 1]
+    return render_template("post.html", post_content=post_content)
+
+
+@app.get("/about")
+def about():
+    return render_template("about.html")
+
+
+@app.get("/contact")
+def contact():
+    return render_template("contact.html")
 
 
 if __name__ == "__main__":
