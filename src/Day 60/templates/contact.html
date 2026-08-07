@@ -29,7 +29,7 @@
                     <!-- To make this form functional, sign up at-->
                     <!-- https://startbootstrap.com/solution/contact-forms-->
                     <!-- to get an API token!-->
-                    <form id="contactForm" data-sb-form-api-token="API_TOKEN">
+                    <form id="contactForm" name="sentMessage" method="POST" action="{{ url_for('contact') }}">
                         <div class="form-floating">
                             <input
                                 class="form-control"
@@ -98,9 +98,7 @@
                             <div class="text-center text-danger mb-3">Error sending message!</div>
                         </div>
                         <!-- Submit Button-->
-                        <button class="btn btn-primary text-uppercase disabled" id="submitButton" type="submit">
-                            Send
-                        </button>
+                        <button class="btn btn-primary text-uppercase" id="submitButton" type="submit">Send</button>
                     </form>
                 </div>
             </div>

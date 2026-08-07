@@ -1,5 +1,5 @@
 from requests import get
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
@@ -27,9 +27,14 @@ def about():
     return render_template("about.html")
 
 
-@app.get("/contact")
+@app.route("/contact", methods=["GET", "POST"])
 def contact():
-    return render_template("contact.html")
+    if request.method == "GET":
+        return render_template("contact.html")
+    elif request.method == "POST":
+        return "<h1>Form Submitted Successfully!</h1>"
+    else:
+        return "Invalid request method!"
 
 
 if __name__ == "__main__":
