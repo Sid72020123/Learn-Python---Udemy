@@ -1,26 +1,46 @@
 from flask import Flask, render_template
+from flask_wtf import FlaskForm
 
-'''
-Red underlines? Install the required packages first: 
-Open the Terminal in PyCharm (bottom left). 
-
-On Windows type:
-python -m pip install -r requirements.txt
-
-On MacOS type:
-pip3 install -r requirements.txt
-
-This will install the packages from requirements.txt for this project.
-'''
-
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired, Email, ValidationError
 
 app = Flask(__name__)
+app.secret_key = "this is a secret ;)"
+
+DUMMY_EMAIL = "admin@email.com"
+DUMMY_PASSWORD = "12345678"
+
+
+def password_length_check(form, field):
+    if len(field.data) < 8:
+        raise ValidationError("Password must at least be of 8 characters length!")
+
+
+class LoginForm(FlaskForm):
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    password = PasswordField(
+        "Password", validators=[DataRequired(), password_length_check]
+    )
+    submit = SubmitField("Log In")
 
 
 @app.route("/")
 def home():
-    return render_template('index.html')
+    return render_template("index.html")
 
 
-if __name__ == '__main__':
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    login_form = LoginForm()
+    if login_form.validate_on_submit():
+        email = login_form.email.data
+        password = login_form.password.data
+        if email == DUMMY_EMAIL and password == DUMMY_PASSWORD:
+            return render_template("success.html")
+        else:
+            return render_template("denied.html")
+    return render_template("login.html", form=login_form)
+
+
+if __name__ == "__main__":
     app.run(debug=True)
