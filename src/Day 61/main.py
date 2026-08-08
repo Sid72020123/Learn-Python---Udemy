@@ -4,8 +4,11 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email, ValidationError
 
+from flask_bootstrap import Bootstrap5
+
 app = Flask(__name__)
 app.secret_key = "this is a secret ;)"
+bootstrap = Bootstrap5(app)
 
 DUMMY_EMAIL = "admin@email.com"
 DUMMY_PASSWORD = "12345678"
