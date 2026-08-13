@@ -2,16 +2,17 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>Add Book</title>
+        <title>My Library - Add Book</title>
     </head>
     <body>
+        <h3>My Library - Add Book</h3>
         <form action="{{ url_for('add') }}" method="POST">
             <label>Book Name</label>
             <input type="text" name="name" /><br />
             <label>Book Author</label>
             <input type="text" name="author" /><br />
             <label>Rating</label>
-            <input type="text" name="rating" /><br />
+            <input type="number" name="rating" step="0.1" /><br />
             <button type="submit">Add Book</button>
         </form>
     </body>

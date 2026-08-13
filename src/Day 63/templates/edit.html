@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>My Library - Edit Entry #{{ id }}</title>
+    </head>
+    <body>
+        <h3>My Library - Edit Entry #{{ id }}</h3>
+        <form action="{{ url_for('edit', id=id) }}" method="POST">
+            <label>Rating:</label>
+            <input type="number" name="rating" step="0.1" /><br /><br />
+            <button type="submit">Save</button>
+        </form>
+        <br /><br />
+        <a href="{{ url_for('home') }}">Go to Home</a>
+    </body>
+</html>
