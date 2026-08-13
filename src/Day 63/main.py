@@ -1,9 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for
-from config import Config
-from flask_sqlalchemy import SQLAlchemy
-
 import sqlalchemy as sa
 import sqlalchemy.orm as so
+from config import Config
+from flask import Flask, redirect, render_template, request, url_for
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -73,7 +72,6 @@ def add():
 
 @app.route("/edit/<int:id>", methods=["GET", "POST"])
 def edit(id):
-    print(id)
     if request.method == "POST":
         new_rating = request.form["rating"]
         with app.app_context():
@@ -86,6 +84,17 @@ def edit(id):
         return redirect(url_for("home"))
     else:
         return render_template("edit.html", id=id)
+
+
+@app.route("/delete/<int:id>", methods=["GET"])
+def delete(id):
+    with app.app_context():
+        book_to_delete = db.session.execute(
+            db.select(Book).where(Book.id == id)
+        ).scalar()
+        db.session.delete(book_to_delete)
+        db.session.commit()
+    return redirect(url_for("home"))
 
 
 if __name__ == "__main__":

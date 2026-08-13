@@ -11,8 +11,9 @@
             <p>Library is empty!</p>
             {% endif %} {% for book in books %}
             <li>
-                {% for key, value in book.items() %} {% if key != 'rating' %} {{ value }} - {% else %} {{ value }}/10 <a href={{ url_for('edit', id=book.id) }}>Edit Rating</a> {%
-                endif %} {% endfor %}
+                <a href="{{ url_for('delete', id=book.id) }}">Delete</a> {% for key, value in book.items() %} {% if key
+                != 'rating' %} {{ value }} - {% else %} {{ value }}/10
+                <a href="{{ url_for('edit', id=book.id) }}">Edit Rating</a> {% endif %} {% endfor %}
             </li>
             {% endfor %}
         </ul>
