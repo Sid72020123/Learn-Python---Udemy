@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap5
 from flask_sqlalchemy import SQLAlchemy
@@ -7,11 +8,20 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, FloatField, SubmitField
 from wtforms.validators import DataRequired
 import requests
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "8BYkEfBA6O6donzWlSihBXox7C0sKR6b"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///movies.db"
 Bootstrap5(app)
+
+load_dotenv()
+
+API_ROOT = "https://api.themoviedb.org/3"
+HEADERS = {
+    "accept": "application/json",
+    "Authorization": f"Bearer {os.environ.get('API_KEY')}",
+}
 
 
 # CREATE DB
@@ -71,9 +81,12 @@ def get_all_movies():
     return all_movies
 
 
-def get_movie(id):
+def get_movie(id, title=None):
     with app.app_context():
-        result = db.session.execute(db.select(Movie).where(Movie.id == id))
+        if title is None:
+            result = db.session.execute(db.select(Movie).where(Movie.id == id))
+        else:
+            result = db.session.execute(db.select(Movie).where(Movie.title == title))
         return result.scalar()
 
 
@@ -97,13 +110,41 @@ def delete_movie_rating(id):
         db.session.commit()
 
 
+def search_movies(title):
+    return requests.get(
+        f"{API_ROOT}/search/movie", params={"query": title}, headers=HEADERS
+    ).json()
+
+
+def add_new_movie_to_db(id):
+    movie_info = requests.get(f"{API_ROOT}/movie/{id}", headers=HEADERS).json()
+
+    new_movie = Movie(
+        title=movie_info["title"],
+        year=int(movie_info["release_date"].split("-")[0]),
+        description=movie_info["overview"],
+        image_url=f"https://image.tmdb.org/t/p/original{movie_info["poster_path"]}",
+        rating=0,
+        review="",
+        ranking=0,
+    )
+    with app.app_context():
+        db.session.add(new_movie)
+        db.session.commit()
+    return movie_info["title"]
+
+
 # Edit Movie Rating Form
-
-
 class RateMovieForm(FlaskForm):
     rating = FloatField("Your Rating Out of 10 e.g. 7.5", validators=[DataRequired()])
     review = StringField("Your Review")
     submit = SubmitField("Save")
+
+
+# Add New Movie Form
+class AddNewMovieForm(FlaskForm):
+    title = StringField("Movie Title", validators=[DataRequired()])
+    submit = SubmitField("Add Movie")
 
 
 @app.route("/")
@@ -130,6 +171,24 @@ def delete():
     id = request.args.get("id")
     delete_movie_rating(id)
     return redirect(url_for("home"))
+
+
+@app.route("/add_new_movie", methods=["GET"])
+def add_new_movie():
+    id = request.args.get("id")
+    title = add_new_movie_to_db(id)
+    id = get_movie(id=None, title=title).id
+    return redirect(url_for("edit", id=id))
+
+
+@app.route("/add", methods=["GET", "POST"])
+def add():
+    form = AddNewMovieForm()
+    if form.validate_on_submit():
+        title = request.form["title"]
+        movies = search_movies(title)["results"]
+        return render_template("select.html", movies=movies)
+    return render_template("add.html", form=form)
 
 
 if __name__ == "__main__":
