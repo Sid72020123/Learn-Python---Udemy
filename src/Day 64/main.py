@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Float
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, FloatField, SubmitField
 from wtforms.validators import DataRequired
 import requests
 
@@ -71,9 +71,49 @@ def get_all_movies():
     return all_movies
 
 
+def get_movie(id):
+    with app.app_context():
+        result = db.session.execute(db.select(Movie).where(Movie.id == id))
+        return result.scalar()
+
+
+def update_movie_rating(id, rating, review):
+    with app.app_context():
+        movie_to_update = db.session.execute(
+            db.select(Movie).where(Movie.id == id)
+        ).scalar()
+        movie_to_update.rating = rating
+        if review is not None:
+            movie_to_update.review = review
+        db.session.commit()
+
+
+# Edit Movie Rating Form
+
+
+class RateMovieForm(FlaskForm):
+    rating = FloatField("Your Rating Out of 10 e.g. 7.5", validators=[DataRequired()])
+    review = StringField("Your Review")
+    submit = SubmitField("Save")
+
+
 @app.route("/")
 def home():
     return render_template("index.html", movies=get_all_movies())
+
+
+@app.route("/edit", methods=["GET", "POST"])
+def edit():
+    form = RateMovieForm()
+    id = request.args.get("id")
+    if form.validate_on_submit():
+        new_rating = request.form["rating"]
+        new_review = request.form["review"]
+        if not new_review:
+            new_review = None
+        update_movie_rating(id, new_rating, new_review)
+        return redirect(url_for("home"))
+    return render_template("edit.html", movie=get_movie(id), form=form)
 
 
 if __name__ == "__main__":
