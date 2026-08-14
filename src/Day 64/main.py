@@ -88,6 +88,15 @@ def update_movie_rating(id, rating, review):
         db.session.commit()
 
 
+def delete_movie_rating(id):
+    with app.app_context():
+        movie_to_delete = db.session.execute(
+            db.select(Movie).where(Movie.id == id)
+        ).scalar()
+        db.session.delete(movie_to_delete)
+        db.session.commit()
+
+
 # Edit Movie Rating Form
 
 
@@ -114,6 +123,13 @@ def edit():
         update_movie_rating(id, new_rating, new_review)
         return redirect(url_for("home"))
     return render_template("edit.html", movie=get_movie(id), form=form)
+
+
+@app.route("/delete", methods=["GET"])
+def delete():
+    id = request.args.get("id")
+    delete_movie_rating(id)
+    return redirect(url_for("home"))
 
 
 if __name__ == "__main__":
