@@ -76,8 +76,8 @@ with app.app_context():
 
 def get_all_movies():
     with app.app_context():
-        result = db.session.execute(db.select(Movie).order_by(Movie.id))
-        all_movies = list(result.scalars())
+        result = db.session.execute(db.select(Movie).order_by(Movie.ranking))
+        all_movies = list(result.scalars())[::-1]
     return all_movies
 
 
@@ -134,6 +134,18 @@ def add_new_movie_to_db(id):
     return movie_info["title"]
 
 
+def update_rankings():
+    all_movies = get_all_movies()
+    ranked = sorted(all_movies, key=lambda x: x.rating, reverse=True)
+    with app.app_context():
+        for index, movie in enumerate(ranked):
+            movie_to_update = db.session.execute(
+                db.select(Movie).where(Movie.id == movie.id)
+            ).scalar()
+            movie_to_update.ranking = index + 1
+        db.session.commit()
+
+
 # Edit Movie Rating Form
 class RateMovieForm(FlaskForm):
     rating = FloatField("Your Rating Out of 10 e.g. 7.5", validators=[DataRequired()])
@@ -162,6 +174,7 @@ def edit():
         if not new_review:
             new_review = None
         update_movie_rating(id, new_rating, new_review)
+        update_rankings()
         return redirect(url_for("home"))
     return render_template("edit.html", movie=get_movie(id), form=form)
 
@@ -170,6 +183,7 @@ def edit():
 def delete():
     id = request.args.get("id")
     delete_movie_rating(id)
+    update_rankings()
     return redirect(url_for("home"))
 
 
