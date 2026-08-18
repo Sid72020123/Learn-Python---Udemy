@@ -74,6 +74,32 @@ def get_all_cafes():
     )
 
 
+@app.route("/search", methods=["GET"])
+def search_by_location():
+    location = request.args.get("loc")
+    if not location:
+        return jsonify(
+            {
+                "error": {
+                    "Argument not provided": "The required 'loc' argument was not provided!"
+                }
+            }
+        )
+    result = db.session.execute(db.select(Cafe).where(Cafe.location == location))
+    all_cafes = result.scalars().all()
+    result = []
+    for cafe in all_cafes:
+        result.append(cafe.to_dict())
+    if len(result) == 0:
+        return jsonify(
+            {"error": {"Not Found": "Sorry, we don't have a cafe at that location."}}
+        )
+    return (
+        jsonify(result),
+        200,
+    )
+
+
 # HTTP POST - Create Record
 
 # HTTP PUT/PATCH - Update Record
