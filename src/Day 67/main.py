@@ -9,7 +9,7 @@ from wtforms.validators import DataRequired, URL
 from flask_ckeditor import CKEditor, CKEditorField
 from datetime import date
 
-'''
+"""
 Make sure the required packages are installed: 
 Open the Terminal in PyCharm (bottom left). 
 
@@ -20,16 +20,19 @@ On MacOS type:
 pip3 install -r requirements.txt
 
 This will install the packages from the requirements.txt for this project.
-'''
+"""
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+app.config["SECRET_KEY"] = "8BYkEfBA6O6donzWlSihBXox7C0sKR6b"
 Bootstrap5(app)
+
 
 # CREATE DATABASE
 class Base(DeclarativeBase):
     pass
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
+
+
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///posts.db"
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
@@ -44,22 +47,32 @@ class BlogPost(db.Model):
     author: Mapped[str] = mapped_column(String(250), nullable=False)
     img_url: Mapped[str] = mapped_column(String(250), nullable=False)
 
+    def to_dict(self):
+        return {
+            column.name: getattr(self, column.name) for column in self.__table__.columns
+        }
+
 
 with app.app_context():
     db.create_all()
 
 
-@app.route('/')
+@app.route("/")
 def get_all_posts():
-    # TODO: Query the database for all the posts. Convert the data to a python list.
-    posts = []
+    result = db.session.execute(db.select(BlogPost))
+    all_posts = result.scalars().all()
+    posts = [x.to_dict() for x in all_posts]
+
     return render_template("index.html", all_posts=posts)
 
+
 # TODO: Add a route so that you can click on individual posts.
-@app.route('/')
+@app.route("/show_post/<int:post_id>")
 def show_post(post_id):
     # TODO: Retrieve a BlogPost from the database based on the post_id
-    requested_post = "Grab the post from your database"
+    result = db.session.execute(db.select(BlogPost).where(BlogPost.id == post_id))
+
+    requested_post = result.scalar().to_dict()
     return render_template("post.html", post=requested_post)
 
 
@@ -68,6 +81,7 @@ def show_post(post_id):
 # TODO: edit_post() to change an existing blog post
 
 # TODO: delete_post() to remove a blog post from the database
+
 
 # Below is the code from previous lessons. No changes needed.
 @app.route("/about")

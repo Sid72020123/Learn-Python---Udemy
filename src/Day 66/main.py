@@ -125,7 +125,7 @@ def create_new_record():
 # HTTP PUT/PATCH - Update Record
 
 
-@app.route("/update-price/<int: cafe_id>", methods=["PATCH"])
+@app.route("/update-price/<int:cafe_id>", methods=["PATCH"])
 def update_price(cafe_id):
     new_price = request.args.get("new_price")
     cafe = db.session.get(entity=Cafe, ident=cafe_id)
