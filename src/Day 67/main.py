@@ -50,7 +50,7 @@ class AddNewPostForm(FlaskForm):
     image_url = StringField("Blog Image URL", validators=[DataRequired(), URL()])
     body = CKEditorField("Blog Content", validators=[DataRequired()])
 
-    submit = SubmitField("Add Blog Post")
+    submit = SubmitField("Add / Save Blog Post")
 
 
 with app.app_context():
@@ -78,13 +78,6 @@ def show_post(post_id):
 def new_post():
     form = AddNewPostForm()
     if form.validate_on_submit():
-        # id: Mapped[int] = mapped_column(Integer, primary_key=True)
-        #     title: Mapped[str] = mapped_column(String(250), unique=True, nullable=False)
-        #     subtitle: Mapped[str] = mapped_column(String(250), nullable=False)
-        #     date: Mapped[str] = mapped_column(String(250), nullable=False)
-        #     body: Mapped[str] = mapped_column(Text, nullable=False)
-        #     author: Mapped[str] = mapped_column(String(250), nullable=False)
-        #     img_url: Mapped[str] = mapped_column(String(250), nullable=False)
         new_post = BlogPost()
         new_post.title = request.form["title"]
         new_post.subtitle = request.form["subtitle"]
@@ -103,10 +96,53 @@ def new_post():
             )
             db.session.commit()
         return redirect(url_for("show_post", post_id=id))
-    return render_template("make-post.html", form=form)
+    return render_template("make-post.html", form=form, type="new")
 
 
-# TODO: edit_post() to change an existing blog post
+@app.route("/edit_post/<int:post_id>", methods=["GET", "POST"])
+def edit_post(post_id):
+    #  id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    #     title: Mapped[str] = mapped_column(String(250), unique=True, nullable=False)
+    #     subtitle: Mapped[str] = mapped_column(String(250), nullable=False)
+    #     date: Mapped[str] = mapped_column(String(250), nullable=False)
+    #     body: Mapped[str] = mapped_column(Text, nullable=False)
+    #     author: Mapped[str] = mapped_column(String(250), nullable=False)
+    #     img_url: Mapped[str] = mapped_column(String(250), nullable=False)
+
+    #     title = StringField("Blog Post Title", validators=[DataRequired()])
+    # subtitle = StringField("Blog Post Subtitle", validators=[DataRequired()])
+    # author = StringField("Your Name", validators=[DataRequired()])
+    # image_url = StringField("Blog Image URL", validators=[DataRequired(), URL()])
+    # body = CKEditorField("Blog Content", validators=[DataRequired()])
+
+    # submit = SubmitField("Add Blog Post")
+    with app.app_context():
+        post = db.session.execute(
+            db.select(BlogPost).where(BlogPost.id == post_id)
+        ).scalar()
+    form = AddNewPostForm(
+        title=post.title,
+        subtitle=post.subtitle,
+        author=post.author,
+        image_url=post.img_url,
+        body=post.body,
+    )
+    print(post, request.method)
+    if form.validate_on_submit():
+        with app.app_context():
+            new_post = db.session.execute(
+                db.select(BlogPost).where(BlogPost.id == post_id)
+            ).scalar()
+            new_post.title = request.form["title"]
+            new_post.subtitle = request.form["subtitle"]
+            new_post.author = request.form["author"]
+            new_post.img_url = request.form["image_url"]
+            new_post.date = post.date
+            new_post.body = cleanify(request.form["body"])
+            db.session.commit()
+        return redirect(url_for("show_post", post_id=post.id))
+    return render_template("make-post.html", form=form, type="edit")
+
 
 # TODO: delete_post() to remove a blog post from the database
 
