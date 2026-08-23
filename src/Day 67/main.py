@@ -101,21 +101,6 @@ def new_post():
 
 @app.route("/edit_post/<int:post_id>", methods=["GET", "POST"])
 def edit_post(post_id):
-    #  id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    #     title: Mapped[str] = mapped_column(String(250), unique=True, nullable=False)
-    #     subtitle: Mapped[str] = mapped_column(String(250), nullable=False)
-    #     date: Mapped[str] = mapped_column(String(250), nullable=False)
-    #     body: Mapped[str] = mapped_column(Text, nullable=False)
-    #     author: Mapped[str] = mapped_column(String(250), nullable=False)
-    #     img_url: Mapped[str] = mapped_column(String(250), nullable=False)
-
-    #     title = StringField("Blog Post Title", validators=[DataRequired()])
-    # subtitle = StringField("Blog Post Subtitle", validators=[DataRequired()])
-    # author = StringField("Your Name", validators=[DataRequired()])
-    # image_url = StringField("Blog Image URL", validators=[DataRequired(), URL()])
-    # body = CKEditorField("Blog Content", validators=[DataRequired()])
-
-    # submit = SubmitField("Add Blog Post")
     with app.app_context():
         post = db.session.execute(
             db.select(BlogPost).where(BlogPost.id == post_id)
@@ -144,10 +129,17 @@ def edit_post(post_id):
     return render_template("make-post.html", form=form, type="edit")
 
 
-# TODO: delete_post() to remove a blog post from the database
+@app.route("/delete_post/<int:post_id>", methods=["GET"])
+def delete_post(post_id):
+    with app.app_context():
+        post = db.session.execute(
+            db.select(BlogPost).where(BlogPost.id == post_id)
+        ).scalar()
+        db.session.delete(post)
+        db.session.commit()
+    return redirect(url_for("get_all_posts"))
 
 
-# Below is the code from previous lessons. No changes needed.
 @app.route("/about")
 def about():
     return render_template("about.html")
