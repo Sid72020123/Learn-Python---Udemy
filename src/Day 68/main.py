@@ -57,11 +57,12 @@ def home():
 def register():
     if request.method == "POST":
         USERNAME = request.form.get("name", "").strip()
+        PASSWORD = request.form.get("password", "").strip()
         if not USERNAME:
             return "No username typed!"
         new_user = User(
             email=request.form.get("email"),
-            password=request.form.get("password"),
+            password=generate_password_hash(PASSWORD, "pbkdf2:sha256", salt_length=8),
             name=USERNAME,
         )
         with app.app_context():
@@ -88,7 +89,7 @@ def logout():
 
 @app.route("/download")
 def download():
-    return send_from_directory('static', path="files/cheat_sheet.pdf")
+    return send_from_directory("static", path="files/cheat_sheet.pdf")
 
 
 if __name__ == "__main__":
