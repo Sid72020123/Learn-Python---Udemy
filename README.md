@@ -10,13 +10,13 @@ Depending on the section, its folder may contain a `project_<number>.py` file wi
 
 ## 🚧 Progress
 
-Currently, this repository contains code and projects from **Day 01 through Day 83**. I'll continue updating it as I progress through the course, adding new solutions and projects along the way.
+Currently, this repository contains code and projects from **Day 01 through Day 82**. I'll continue updating it as I progress through the course, adding new solutions and projects along the way.
 
 ## 🎯 Course Completion
 
 I've completed Udemy's [100 Days of Code™: The Complete Python Pro Bootcamp](https://www.udemy.com/course/100-days-of-code/), taught by Dr. Angela Yu.
 
-This repository currently contains code and projects from **Day 01 through Day 83**. I'll continue updating it as I work through the remaining optional sections and add more solutions and projects.
+This repository currently contains code and projects from **Day 01 through Day 82**. I'll continue updating it as I work through the remaining optional sections and add more solutions and projects.
 
 ## 🙏 Acknowledgements
 
